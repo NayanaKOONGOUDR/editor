@@ -1,0 +1,109 @@
+class Flight:
+    def __init__(self, flight_number, destination, available_seats, price):
+        self.flight_number = flight_number
+        self.destination = destination
+        self.available_seats = available_seats
+        self.price = price           
+
+class User:
+    def __init__(self, name, user_class):
+        self.name = name
+        self.user_class = user_class
+
+class FlightReservationSystem:
+    def __init__(self):
+        self.flights = []
+        self.reservations = {}
+
+    def add_flight(self, flight):
+        self.flights.append(flight)
+
+    def show_availability(self):
+        for flight in self.flights:
+            print(f"Flight Number: {flight.flight_number}, Destination: {flight.destination}, Available Seats: {flight.available_seats}, Price: ${flight.price}")
+
+    def book_flight(self, user, flight_number, food_choice):
+        food_prices = {'Vegetarian': 20, 'Non-Vegetarian': 30, 'Vegan': 25}
+        total_price = 0
+        
+        for flight in self.flights:
+            if flight.flight_number == flight_number and flight.available_seats > 0:
+                flight.available_seats -= 1
+                total_price = flight.price + food_prices.get(food_choice, 0)
+                self.reservations[user.name] = (flight_number, food_choice, total_price)
+                print(f"Flight booked for {user.name}. Class: {user.user_class}. Food choice: {food_choice}. Total price: ${total_price}")
+                return
+        print("Flight not available or fully booked.")
+
+    def process_payment(self, user):
+        if user.name in self.reservations:
+            amount = self.reservations[user.name][2]
+            print(f"Payment successful! Amount to be paid: ${amount}.")
+        else:
+            print("No reservation found.")
+
+    def update_reservation(self, user, new_flight_number, new_food_choice):
+        food_prices = {'Vegetarian': 20, 'Non-Vegetarian': 30, 'Vegan': 25}
+        if user.name in self.reservations:
+            old_flight_number = self.reservations[user.name][0]
+            for flight in self.flights:
+                if flight.flight_number == new_flight_number:
+                    total_price = flight.price + food_prices.get(new_food_choice, 0)
+                    self.reservations[user.name] = (new_flight_number, new_food_choice, total_price)
+                    print(f"Reservation updated for {user.name} from {old_flight_number} to {new_flight_number}. Food choice: {new_food_choice}. Total price: ${total_price}. Class: {user.user_class}")
+                    return
+        else:
+            print("No reservation found.")
+
+    def cancel_reservation(self, user):
+        if user.name in self.reservations:
+            flight_number = self.reservations[user.name][0]
+            for flight in self.flights:
+                if flight.flight_number == flight_number:
+                    flight.available_seats += 1
+            del self.reservations[user.name]
+            print(f"Reservation canceled for {user.name}.")
+        else:
+            print("No reservation found.")
+
+def main():
+    system = FlightReservationSystem()
+    system.add_flight(Flight("AA123", "New York", 5, 300))
+    system.add_flight(Flight("BB456", "Los Angeles", 3, 450))
+
+    while True:
+        print("\n1. Show Availability\n2. Book Flight\n3. Process Payment\n4. Update Reservation\n5. Cancel Reservation\n6. Exit")
+        choice = input("Select an option: ")
+
+        if choice == '1':
+            system.show_availability()
+        elif choice == '2':
+            name = input("Enter your name: ")
+            user_class = input("Enter class (Economy/Business/First): ")
+            user = User(name, user_class)
+            flight_number = input("Enter flight number: ")
+            food_choice = input("Enter food choice (Vegetarian/Non-Vegetarian/Vegan): ")
+            system.book_flight(user, flight_number, food_choice)
+        elif choice == '3':
+            name = input("Enter your name: ")
+            user = User(name, "")
+            system.process_payment(user)
+        elif choice == '4':
+            name = input("Enter your name: ")
+            user_class = input("Enter class (Economy/Business/First): ")
+            user = User(name, user_class)
+            new_flight_number = input("Enter new flight number: ")
+            new_food_choice = input("Enter new food choice (Vegetarian/Non-Vegetarian/Vegan): ")
+            system.update_reservation(user, new_flight_number, new_food_choice)
+        elif choice == '5':
+            name = input("Enter your name: ")
+            user = User(name, "")
+            system.cancel_reservation(user)
+        elif choice == '6':
+            print("Exiting the system.")
+            break
+        else:
+            print("Invalid option. Please try again.")
+
+if __name__ == "__main__":
+    main()
